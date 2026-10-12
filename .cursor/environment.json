@@ -1,0 +1,4 @@
+{
+  "name": "terminal-gpt-mini",
+  "install": "python3 -m pip install -e . && python3 -m pip install -r ml/requirements-ml.txt && python3 ml/train.py --smoke"
+}

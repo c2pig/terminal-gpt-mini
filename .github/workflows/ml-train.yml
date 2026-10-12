@@ -1,0 +1,73 @@
+name: ML train
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_steps:
+        description: "Training steps override (empty uses ml/config/tiny.yaml)"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "ml/**"
+      - ".github/workflows/ml-train.yml"
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: ml/requirements-ml.txt
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install -r ml/requirements-ml.txt
+
+      - name: Generate sessions
+        run: python ml/data/generate_sessions.py --out-dir ml/data/full --variations 3
+
+      - name: Train
+        env:
+          MAX_STEPS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_steps || '' }}
+        run: |
+          args=(--output-dir ml/outputs/full)
+          if [ -n "${MAX_STEPS}" ]; then
+            args+=(--max-steps "${MAX_STEPS}")
+          fi
+          python ml/train.py "${args[@]}"
+
+      - name: Eval
+        run: python ml/eval.py --model-dir ml/outputs/full
+
+      - name: Upload eval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: train-eval
+          path: |
+            ml/outputs/full/eval_results.json
+            ml/outputs/full/sample_generations.txt
+
+      - name: Upload model to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          echo "Uploading terminal-shell-mini for git SHA ${GIT_SHA}"
+          python ml/upload_to_hub.py \
+            --model-dir ml/outputs/full \
+            --repo-id c2pig/terminal-shell-mini \
+            --sha "${GIT_SHA}"

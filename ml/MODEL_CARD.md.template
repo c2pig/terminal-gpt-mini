@@ -1,0 +1,42 @@
+---
+tags:
+  - text-generation
+  - gpt2
+  - terminal
+library_name: transformers
+pipeline_tag: text-generation
+---
+
+# terminal-shell-mini
+
+Tiny GPT-2-style model that imitates Ubuntu 22.04 bash output and answers short questions about a session.
+
+| | |
+| --- | --- |
+| Parameters | __PARAMS__ |
+| Git SHA | `__GIT_SHA__` |
+| Tokenizer | `gpt2` plus chat marker tokens |
+| Training | GitHub Actions CPU runner, `ml/config/tiny.yaml` |
+| Data | Synthetic `ubuntu:22.04` sessions from `ml/data/generate_sessions.py` |
+
+## Prompt format
+
+```
+<|system|>
+You are a Linux terminal on Ubuntu. ...
+<|user|>
+user@dev:~$ pwd
+<|assistant|>
+/home/user
+<|end|>
+```
+
+The local server in `serve/` turns OpenAI `messages` into this prompt.
+
+## Intended use
+
+A toy terminal for `terminal-gpt` pointed at `POST /v1/chat/completions`. It is not a real shell, and it is not a general chatbot.
+
+## How this checkpoint was published
+
+GitHub Actions workflow `ML train` uploaded this folder with `HF_TOKEN`. The git SHA above is the commit that produced the weights.

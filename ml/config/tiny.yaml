@@ -1,0 +1,48 @@
+# Tiny GPT-2 trained from scratch on synthetic Ubuntu shell sessions.
+# Unique parameter count lands around 3–4M (tied input/output embeddings).
+
+model:
+  n_layer: 4
+  n_embd: 64
+  n_head: 4
+  n_inner: 256
+  n_positions: 256
+  # Dropout is off so the smoke run can memorize the committed sample.
+  resid_pdrop: 0.0
+  embd_pdrop: 0.0
+  attn_pdrop: 0.0
+
+tokenizer:
+  pretrained: gpt2
+
+data:
+  train_file: ml/data/full/train.jsonl
+  val_file: ml/data/full/val.jsonl
+  test_file: ml/data/full/test.jsonl
+  sample_train_file: ml/data/sample/train.jsonl
+  sample_val_file: ml/data/sample/val.jsonl
+  sample_test_file: ml/data/sample/test.jsonl
+  eval_prompts_file: ml/data/sample/eval_prompts.json
+
+train:
+  max_seq_len: 256
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  learning_rate: 0.0005
+  weight_decay: 0.01
+  warmup_steps: 50
+  max_steps: 1500
+  logging_steps: 25
+  eval_steps: 250
+  seed: 42
+  lr_scheduler_type: cosine
+
+# Cursor Cloud and local smoke. GitHub Actions passes a smaller --max-steps.
+smoke:
+  max_steps: 200
+  per_device_train_batch_size: 4
+  learning_rate: 0.001
+  weight_decay: 0.0
+  warmup_steps: 10
+  logging_steps: 10
+  eval_steps: 100

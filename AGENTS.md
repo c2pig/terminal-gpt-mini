@@ -8,7 +8,7 @@ The committed `.cursor/environment.json` install does three things:
 
 1. `python3 -m pip install -e .` so `terminal-gpt` is on `PATH`.
 2. `python3 -m pip install -r ml/requirements-ml.txt` (CPU torch from the PyTorch wheel index).
-3. `python3 ml/train.py --smoke`, which trains on `ml/data/sample` for the step count in `ml/config/tiny.yaml` (`smoke.max_steps`, 200).
+3. `python3 ml/train.py --smoke`, which trains on `ml/data/sample` for the step count in `ml/config/tiny.yaml` (`smoke.max_steps`, 500).
 
 ### Regenerate data
 

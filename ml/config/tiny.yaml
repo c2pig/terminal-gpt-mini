@@ -2,10 +2,11 @@
 # Unique parameter count lands around 3–4M (tied input/output embeddings).
 
 model:
+  # Most parameters sit in the transformer, not a 50k GPT-2 embedding table.
   n_layer: 4
-  n_embd: 64
-  n_head: 4
-  n_inner: 256
+  n_embd: 256
+  n_head: 8
+  n_inner: 1024
   n_positions: 256
   # Dropout is off so the smoke run can memorize the committed sample.
   resid_pdrop: 0.0
@@ -13,7 +14,8 @@ model:
   attn_pdrop: 0.0
 
 tokenizer:
-  pretrained: gpt2
+  # Byte-level BPE fit on the training text (GPT-2 style), capped at this size.
+  vocab_size: 800
 
 data:
   train_file: ml/data/full/train.jsonl
@@ -38,11 +40,13 @@ train:
   lr_scheduler_type: cosine
 
 # Cursor Cloud and local smoke. GitHub Actions passes a smaller --max-steps.
+# Constant LR so the short run can memorize the committed sample.
 smoke:
-  max_steps: 200
+  max_steps: 500
   per_device_train_batch_size: 4
   learning_rate: 0.001
   weight_decay: 0.0
   warmup_steps: 10
-  logging_steps: 10
-  eval_steps: 100
+  logging_steps: 20
+  eval_steps: 200
+  lr_scheduler_type: constant_with_warmup

@@ -20,7 +20,10 @@ END_TOKEN = "<|end|>"
 
 
 def prepare_tokenizer(tokenizer):
-    tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
+    vocab = tokenizer.get_vocab()
+    missing = [token for token in SPECIAL_TOKENS if token not in vocab]
+    if missing:
+        tokenizer.add_special_tokens({"additional_special_tokens": missing})
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     return tokenizer

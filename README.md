@@ -26,7 +26,7 @@ Requires Python 3.11+.
 
 ## End-to-end
 
-The local model is a from-scratch GPT-2 of about 3–4M parameters. Weights are not stored in git. GitHub Actions trains on CPU and uploads them to Hugging Face.
+The local model is a from-scratch GPT-2 of about 3.4M parameters with a byte-level BPE tokenizer fit on the training text. Weights are not stored in git. GitHub Actions trains on CPU and uploads them to Hugging Face.
 
 ### 1. Prerequisites
 
@@ -72,7 +72,7 @@ python ml/train.py --smoke
 python ml/eval.py --model-dir ml/outputs/smoke
 ```
 
-`--smoke` trains on `ml/data/sample` for `smoke.max_steps` in `ml/config/tiny.yaml` (200). Override with `--max-steps`. The checkpoint is `ml/outputs/smoke/` (`config.json`, `model.safetensors`, tokenizer). `eval.py` writes `eval_results.json` and `sample_generations.txt` next to it.
+`--smoke` trains on `ml/data/sample` for `smoke.max_steps` in `ml/config/tiny.yaml` (500). Override with `--max-steps`. The checkpoint is `ml/outputs/smoke/` (`config.json`, `model.safetensors`, tokenizer). `eval.py` writes `eval_results.json` and `sample_generations.txt` next to it.
 
 ### 4. Run the GitHub Actions train
 

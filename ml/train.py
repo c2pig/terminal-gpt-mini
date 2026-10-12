@@ -20,10 +20,15 @@ import torch
 import yaml
 from datasets import load_dataset
 from torch.utils.data import Dataset
+from tokenizers import Tokenizer
+from tokenizers.decoders import ByteLevel as ByteLevelDecoder
+from tokenizers.models import BPE
+from tokenizers.pre_tokenizers import ByteLevel
+from tokenizers.trainers import BpeTrainer
 from transformers import (
-    AutoTokenizer,
     GPT2Config,
     GPT2LMHeadModel,
+    PreTrainedTokenizerFast,
     Trainer,
     TrainingArguments,
 )
@@ -31,7 +36,7 @@ from transformers import (
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "ml"))
 
-from chat_format import encode_example, prepare_tokenizer  # noqa: E402
+from chat_format import SPECIAL_TOKENS, encode_example, prepare_tokenizer  # noqa: E402
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("OMP_NUM_THREADS", "4")
@@ -108,6 +113,43 @@ def unique_parameter_count(model) -> int:
     return sum(seen.values())
 
 
+def iter_message_text(paths: list[Path]):
+    for path in paths:
+        with path.open(encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                record = json.loads(line)
+                for message in record["messages"]:
+                    content = str(message.get("content") or "")
+                    if content:
+                        yield content
+
+
+def build_tokenizer(paths: list[Path], vocab_size: int) -> PreTrainedTokenizerFast:
+    """Fit a byte-level BPE on the chat text so the embedding table stays small."""
+    backend = Tokenizer(BPE(unk_token="<unk>"))
+    backend.pre_tokenizer = ByteLevel(add_prefix_space=False)
+    backend.decoder = ByteLevelDecoder()
+    trainer = BpeTrainer(
+        vocab_size=vocab_size,
+        min_frequency=1,
+        special_tokens=["<unk>", "<|endoftext|>", *SPECIAL_TOKENS],
+        show_progress=False,
+    )
+    backend.train_from_iterator(iter_message_text(paths), trainer=trainer)
+    tokenizer = PreTrainedTokenizerFast(
+        tokenizer_object=backend,
+        unk_token="<unk>",
+        bos_token="<|endoftext|>",
+        eos_token="<|endoftext|>",
+        pad_token="<|endoftext|>",
+        additional_special_tokens=list(SPECIAL_TOKENS),
+    )
+    return prepare_tokenizer(tokenizer)
+
+
 def build_model(cfg: dict, tokenizer) -> GPT2LMHeadModel:
     model_cfg = cfg["model"]
     n_embd = int(model_cfg["n_embd"])
@@ -133,7 +175,6 @@ def build_model(cfg: dict, tokenizer) -> GPT2LMHeadModel:
     if model.generation_config is not None:
         model.generation_config.eos_token_id = end_id
         model.generation_config.pad_token_id = tokenizer.pad_token_id
-        model.generation_config.max_length = int(model_cfg["n_positions"])
     return model
 
 
@@ -179,7 +220,8 @@ def main() -> int:
         output_dir = ROOT / output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    tokenizer = prepare_tokenizer(AutoTokenizer.from_pretrained(cfg["tokenizer"]["pretrained"]))
+    vocab_size = int(cfg.get("tokenizer", {}).get("vocab_size", 800))
+    tokenizer = build_tokenizer([train_file, val_file], vocab_size)
     marker = tokenizer.encode("<|system|>", add_special_tokens=False)
     if len(marker) != 1:
         raise SystemExit("Chat marker tokens were not kept intact by the tokenizer.")

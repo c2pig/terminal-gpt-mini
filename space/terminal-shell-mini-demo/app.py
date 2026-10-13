@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import traceback
 
 import spaces
 import gradio as gr
@@ -22,9 +23,29 @@ print("Model ready.")
 
 
 @spaces.GPU(duration=5)
-def _zerogpu_ready() -> str:
-    """Satisfies ZeroGPU hosting; inference runs on CPU below."""
+def _zerogpu_entrypoint():
+    """Required for ZeroGPU Spaces; do not call from Gradio handlers (inference is CPU)."""
     return "ok"
+
+
+def _message_text(content) -> str:
+    """Normalize Gradio 6 chat content (str or list of text blocks)."""
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                if block.get("type") == "text":
+                    parts.append(str(block.get("text", "")))
+                elif "text" in block:
+                    parts.append(str(block["text"]))
+            else:
+                parts.append(str(block))
+        return "".join(parts)
+    return str(content)
 
 
 def _to_user_message(text: str) -> str:
@@ -50,16 +71,7 @@ def _messages_from_history(history: list[tuple[str, str]], user_line: str) -> li
     return messages
 
 
-def run_command(
-    user_input: str,
-    history: list[tuple[str, str]],
-) -> tuple[str, list[tuple[str, str]]]:
-    """Run one fake-shell turn: user line in, model stdout-style text out."""
-    _zerogpu_ready()
-    user_line = _to_user_message(user_input)
-    if not user_line:
-        return "", history
-
+def _infer(user_input: str, history: list[tuple[str, str]]) -> str:
     messages = _messages_from_history(history, user_input)
     positions = int(_model.config.n_positions)
     max_new = max(8, min(MAX_NEW_TOKENS, positions - 8))
@@ -77,9 +89,7 @@ def run_command(
             pad_token_id=_tokenizer.pad_token_id,
             eos_token_id=end_id,
         )
-    reply = decode_new_tokens(_tokenizer, output[0].tolist(), len(prompt_len_ids))
-    history = history + [(user_input.strip(), reply)]
-    return "", history
+    return decode_new_tokens(_tokenizer, output[0].tolist(), len(prompt_len_ids))
 
 
 def _pairs_from_messages(history: list | None) -> list[tuple[str, str]]:
@@ -89,30 +99,42 @@ def _pairs_from_messages(history: list | None) -> list[tuple[str, str]]:
     for item in history:
         if isinstance(item, dict):
             role = item.get("role")
-            content = str(item.get("content") or "")
+            content = _message_text(item.get("content"))
             if role == "user":
                 pairs.append((content, ""))
             elif role == "assistant" and pairs:
-                u, _ = pairs[-1]
-                pairs[-1] = (u, content)
+                user, _ = pairs[-1]
+                pairs[-1] = (user, content)
         elif isinstance(item, (list, tuple)) and len(item) == 2:
             pairs.append((str(item[0]), str(item[1])))
-    return [(u, a) for u, a in pairs if a or u]
+    return [(u, a) for u, a in pairs if u]
 
 
 def _messages_from_pairs(pairs: list[tuple[str, str]]) -> list[dict]:
     out: list[dict] = []
     for user, assistant in pairs:
-        out.append({"role": "user", "content": user})
-        out.append({"role": "assistant", "content": assistant})
+        out.append({"role": "user", "content": user, "metadata": None})
+        if assistant:
+            out.append({"role": "assistant", "content": assistant, "metadata": None})
     return out
 
 
 def respond(message: str, history: list | None) -> tuple[str, list]:
     """Append one user turn and the model reply to the chat history."""
-    pairs = _pairs_from_messages(history)
-    _, new_pairs = run_command(message, pairs)
-    return "", _messages_from_pairs(new_pairs)
+    try:
+        text = (message or "").strip()
+        if not text:
+            return "", history or []
+        pairs = _pairs_from_messages(history)
+        reply = _infer(text, pairs)
+        pairs = pairs + [(text, reply)]
+        return "", _messages_from_pairs(pairs)
+    except Exception:
+        err = traceback.format_exc()
+        print(err)
+        pairs = _pairs_from_messages(history)
+        pairs = pairs + [(message.strip(), f"(error) {err.splitlines()[-1]}")]
+        return "", _messages_from_pairs(pairs)
 
 
 DESCRIPTION = """
@@ -148,7 +170,7 @@ with gr.Blocks(title="terminal-shell-mini") as demo:
 
     box.submit(respond, [box, chat], [box, chat])
     send.click(respond, [box, chat], [box, chat])
-    clear.click(lambda: (None, ""), outputs=[chat, box])
+    clear.click(lambda: ([], ""), outputs=[chat, box])
 
 if __name__ == "__main__":
-    demo.launch(mcp_server=True)
+    demo.launch()

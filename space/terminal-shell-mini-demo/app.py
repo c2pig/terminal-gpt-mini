@@ -15,17 +15,11 @@ from chat_format import decode_new_tokens, prompt_token_ids
 MODEL_ID = os.environ.get("HF_MODEL_ID", "c2pig/terminal-shell-mini")
 MAX_NEW_TOKENS = int(os.environ.get("MAX_NEW_TOKENS", "96"))
 
-print(f"Loading {MODEL_ID} on CPU…")
+print(f"Loading {MODEL_ID}…")
 _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-_model = AutoModelForCausalLM.from_pretrained(MODEL_ID)
+_model = AutoModelForCausalLM.from_pretrained(MODEL_ID).to("cuda")
 _model.eval()
-print("Model ready.")
-
-
-@spaces.GPU(duration=5)
-def _zerogpu_entrypoint():
-    """Required for ZeroGPU Spaces; do not call from Gradio handlers (inference is CPU)."""
-    return "ok"
+print("Model ready (cuda placement for ZeroGPU).")
 
 
 def _message_text(content) -> str:
@@ -46,6 +40,10 @@ def _message_text(content) -> str:
                 parts.append(str(block))
         return "".join(parts)
     return str(content)
+
+
+def _chat_line(role: str, text: str) -> dict:
+    return {"role": role, "content": [{"type": "text", "text": text}]}
 
 
 def _to_user_message(text: str) -> str:
@@ -77,7 +75,8 @@ def _infer(user_input: str, history: list[tuple[str, str]]) -> str:
     max_new = max(8, min(MAX_NEW_TOKENS, positions - 8))
     budget = max(8, positions - max_new)
     prompt_len_ids = prompt_token_ids(_tokenizer, messages, budget)
-    input_ids = torch.tensor([prompt_len_ids], dtype=torch.long)
+    device = _model.device
+    input_ids = torch.tensor([prompt_len_ids], dtype=torch.long, device=device)
     end_id = _tokenizer.convert_tokens_to_ids("<|end|>")
 
     with torch.inference_mode():
@@ -113,12 +112,13 @@ def _pairs_from_messages(history: list | None) -> list[tuple[str, str]]:
 def _messages_from_pairs(pairs: list[tuple[str, str]]) -> list[dict]:
     out: list[dict] = []
     for user, assistant in pairs:
-        out.append({"role": "user", "content": user, "metadata": None})
+        out.append(_chat_line("user", user))
         if assistant:
-            out.append({"role": "assistant", "content": assistant, "metadata": None})
+            out.append(_chat_line("assistant", assistant))
     return out
 
 
+@spaces.GPU(duration=60)
 def respond(message: str, history: list | None) -> tuple[str, list]:
     """Append one user turn and the model reply to the chat history."""
     try:

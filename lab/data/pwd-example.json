@@ -1,0 +1,494 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a Linux terminal on Ubuntu. If the user message is a shell prompt and command, reply with only the command output. If the user asks a question, answer in one or two short sentences."
+    },
+    {
+      "role": "user",
+      "content": "user@dev:~/docs$ pwd"
+    },
+    {
+      "role": "assistant",
+      "content": "/home/user/docs"
+    }
+  ],
+  "rendered": "<|system|>\nYou are a Linux terminal on Ubuntu. If the user message is a shell prompt and command, reply with only the command output. If the user asks a question, answer in one or two short sentences.\n<|user|>\nuser@dev:~/docs$ pwd\n<|assistant|>\n/home/user/docs\n<|end|>\n",
+  "encoded": {
+    "input_ids": [
+      2,
+      83,
+      148,
+      142,
+      85,
+      162,
+      184,
+      98,
+      181,
+      18,
+      110,
+      97,
+      102,
+      187,
+      126,
+      85,
+      132,
+      176,
+      131,
+      107,
+      16,
+      180,
+      146,
+      174,
+      97,
+      107,
+      185,
+      18,
+      110,
+      97,
+      102,
+      166,
+      85,
+      182,
+      16,
+      183,
+      141,
+      144,
+      143,
+      135,
+      173,
+      186,
+      18,
+      83,
+      3,
+      83,
+      93,
+      35,
+      120,
+      199,
+      195,
+      8,
+      345,
+      83,
+      4,
+      83,
+      19,
+      211,
+      19,
+      93,
+      19,
+      195,
+      83,
+      5,
+      83
+    ],
+    "labels": [
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      -100,
+      19,
+      211,
+      19,
+      93,
+      19,
+      195,
+      83,
+      5,
+      83
+    ],
+    "attention_mask": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "token_spans": [
+    {
+      "id": 2,
+      "piece": "<|system|>"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 148,
+      "piece": "You"
+    },
+    {
+      "id": 142,
+      "piece": " are"
+    },
+    {
+      "id": 85,
+      "piece": " a"
+    },
+    {
+      "id": 162,
+      "piece": " Linux"
+    },
+    {
+      "id": 184,
+      "piece": " terminal"
+    },
+    {
+      "id": 98,
+      "piece": " on"
+    },
+    {
+      "id": 181,
+      "piece": " Ubuntu"
+    },
+    {
+      "id": 18,
+      "piece": "."
+    },
+    {
+      "id": 110,
+      "piece": " If"
+    },
+    {
+      "id": 97,
+      "piece": " the"
+    },
+    {
+      "id": 102,
+      "piece": " user"
+    },
+    {
+      "id": 187,
+      "piece": " message"
+    },
+    {
+      "id": 126,
+      "piece": " is"
+    },
+    {
+      "id": 85,
+      "piece": " a"
+    },
+    {
+      "id": 132,
+      "piece": " shell"
+    },
+    {
+      "id": 176,
+      "piece": " prompt"
+    },
+    {
+      "id": 131,
+      "piece": " and"
+    },
+    {
+      "id": 107,
+      "piece": " command"
+    },
+    {
+      "id": 16,
+      "piece": ","
+    },
+    {
+      "id": 180,
+      "piece": " reply"
+    },
+    {
+      "id": 146,
+      "piece": " with"
+    },
+    {
+      "id": 174,
+      "piece": " only"
+    },
+    {
+      "id": 97,
+      "piece": " the"
+    },
+    {
+      "id": 107,
+      "piece": " command"
+    },
+    {
+      "id": 185,
+      "piece": " output"
+    },
+    {
+      "id": 18,
+      "piece": "."
+    },
+    {
+      "id": 110,
+      "piece": " If"
+    },
+    {
+      "id": 97,
+      "piece": " the"
+    },
+    {
+      "id": 102,
+      "piece": " user"
+    },
+    {
+      "id": 166,
+      "piece": " asks"
+    },
+    {
+      "id": 85,
+      "piece": " a"
+    },
+    {
+      "id": 182,
+      "piece": " question"
+    },
+    {
+      "id": 16,
+      "piece": ","
+    },
+    {
+      "id": 183,
+      "piece": " answer"
+    },
+    {
+      "id": 141,
+      "piece": " in"
+    },
+    {
+      "id": 144,
+      "piece": " one"
+    },
+    {
+      "id": 143,
+      "piece": " or"
+    },
+    {
+      "id": 135,
+      "piece": " two"
+    },
+    {
+      "id": 173,
+      "piece": " short"
+    },
+    {
+      "id": 186,
+      "piece": " sentences"
+    },
+    {
+      "id": 18,
+      "piece": "."
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 3,
+      "piece": "<|user|>"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 93,
+      "piece": "user"
+    },
+    {
+      "id": 35,
+      "piece": "@"
+    },
+    {
+      "id": 120,
+      "piece": "dev"
+    },
+    {
+      "id": 199,
+      "piece": ":~/"
+    },
+    {
+      "id": 195,
+      "piece": "docs"
+    },
+    {
+      "id": 8,
+      "piece": "$"
+    },
+    {
+      "id": 345,
+      "piece": " pwd"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 4,
+      "piece": "<|assistant|>"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 19,
+      "piece": "/"
+    },
+    {
+      "id": 211,
+      "piece": "home"
+    },
+    {
+      "id": 19,
+      "piece": "/"
+    },
+    {
+      "id": 93,
+      "piece": "user"
+    },
+    {
+      "id": 19,
+      "piece": "/"
+    },
+    {
+      "id": 195,
+      "piece": "docs"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    },
+    {
+      "id": 5,
+      "piece": "<|end|>"
+    },
+    {
+      "id": 83,
+      "piece": "\n"
+    }
+  ],
+  "vocab_size": 489,
+  "yaml_snippet": {
+    "n_layer": 4,
+    "n_embd": 256,
+    "n_head": 8,
+    "n_inner": 1024,
+    "n_positions": 256,
+    "max_seq_len": 256,
+    "vocab_size": 800,
+    "max_steps_smoke": 500,
+    "batch_size": 4
+  }
+}

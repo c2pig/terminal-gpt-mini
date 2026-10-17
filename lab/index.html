@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>terminal-shell-mini — Knowledge Museum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="title-block">
+        <h1>Knowledge museum — train &amp; infer in this repo</h1>
+        <p>Four wings: repo map, training pipeline, artifacts on disk, inference. Use <strong>Gap tour</strong> for a guided path.</p>
+        <p id="load-error" hidden style="color: var(--danger); margin-top: 0.35rem"></p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn" id="btn-glossary">Glossary</button>
+        <button type="button" class="btn btn-primary" id="btn-tour">Gap tour</button>
+      </div>
+    </header>
+
+    <div class="tour-bar" id="tour-bar">
+      <span id="tour-text"></span>
+      <div class="tour-dots" id="tour-dots"></div>
+      <div>
+        <button type="button" class="btn" id="tour-skip">Exit</button>
+        <button type="button" class="btn btn-primary" id="tour-next">Next</button>
+      </div>
+    </div>
+
+    <div class="breadcrumb" id="breadcrumb">MAP › Overview</div>
+
+    <div class="layout">
+      <nav class="wing-nav" aria-label="Museum wings">
+        <h2>Wings</h2>
+        <button type="button" class="wing-btn active" data-wing="map">MAP</button>
+        <button type="button" class="wing-btn" data-wing="train">TRAIN</button>
+        <button type="button" class="wing-btn" data-wing="artifacts">ARTIFACTS</button>
+        <button type="button" class="wing-btn" data-wing="infer">INFER</button>
+      </nav>
+
+      <nav class="sub-nav" id="sub-nav" aria-label="Sub topics"></nav>
+
+      <main class="museum-main">
+        <div class="wing-panel active" id="wing-map" data-wing="map"></div>
+
+        <div class="wing-panel" id="wing-train" data-wing="train">
+          <section class="panel active" data-step="overview">
+            <h2>Big picture</h2>
+            <p class="lead"><code>train.py</code> reads chat JSONL, builds a tokenizer, encodes rows, and updates a tiny GPT-2 to predict assistant tokens.</p>
+            <div class="io-grid">
+              <div class="card"><span class="badge badge-in">Inputs</span><ul style="margin:0;padding-left:1.2rem;color:var(--muted);font-size:0.9rem"><li><code>ml/config/tiny.yaml</code></li><li>train/val JSONL</li><li><code>--smoke</code>, <code>--max-steps</code></li></ul></div>
+              <div class="card"><span class="badge badge-out">Outputs</span><ul style="margin:0;padding-left:1.2rem;color:var(--muted);font-size:0.9rem"><li><code>model.safetensors</code></li><li><code>tokenizer.json</code></li><li><code>train_meta.json</code></li></ul></div>
+            </div>
+            <details class="drill"><summary>Double-click details — supervised LM</summary><div class="drill-body">Each JSONL line is a full chat. Loss is only on assistant text (see INFER › Train vs infer).</div></details>
+          </section>
+          <section class="panel" data-step="jsonl">
+            <h2>Step 1 — JSONL row</h2>
+            <p class="lead">One line = one <code>messages</code> array.</p>
+            <div class="io-grid">
+              <div class="card"><span class="badge badge-in">Chat</span><div class="chat" id="chat-jsonl"></div></div>
+              <div class="card"><span class="badge badge-out">Raw JSON</span><pre class="io-box io-in" id="raw-json" style="max-height:200px;overflow:auto"></pre></div>
+            </div>
+          </section>
+          <section class="panel" data-step="tokenizer">
+            <h2>Step 2 — Tokenizer</h2>
+            <p class="lead">Byte-level BPE fit on train+val message text (~800 vocab). <strong>IDs are integers, not vectors.</strong></p>
+            <div class="card"><h3>Rendered string</h3><pre class="io-box io-in" id="rendered-text"></pre></div>
+            <div class="card"><h3>Tokens</h3><p id="encode-stats" style="font-size:0.85rem;color:var(--muted)"></p><div class="token-strip" id="token-strip"></div></div>
+          </section>
+          <section class="panel" data-step="encode">
+            <h2>Step 3 — encode_example</h2>
+            <p class="lead"><span style="color:var(--train)">Yellow</span> = trained; gray = label <code>-100</code>.</p>
+            <div class="card"><table class="params"><thead><tr><th>pos</th><th>id</th><th>token</th><th>label</th></tr></thead><tbody id="align-tbody"></tbody></table></div>
+          </section>
+          <section class="panel" data-step="model">
+            <h2>Step 4 — GPT-2 (random weights at init)</h2>
+            <p class="lead">Embeddings turn IDs into vectors inside the network.</p>
+            <div class="card arch">
+              <div class="arch-box">IDs → Embedding (vectors)</div>
+              <div class="arch-box">4× Transformer block</div>
+              <div class="arch-box">LM head → logits</div>
+            </div>
+            <div class="card"><table class="params"><thead><tr><th>Key</th><th>Value</th><th>Meaning</th></tr></thead><tbody id="yaml-table"></tbody></table></div>
+          </section>
+          <section class="panel" data-step="batch">
+            <h2>Step 5 — PadCollator</h2>
+            <div class="card"><div id="pad-demo"></div></div>
+          </section>
+          <section class="panel" data-step="step">
+            <h2>Step 6 — One train step</h2>
+            <div class="card" id="train-step-detail"></div>
+          </section>
+          <section class="panel" data-step="loop">
+            <h2>Step 7 — Trainer loop</h2>
+            <div class="card">
+              <input type="range" id="step-slider" min="1" max="500" value="120" style="width:100%;accent-color:var(--accent)" />
+              <p id="step-readout" style="font-family:var(--mono);font-size:0.85rem"></p>
+              <p>Illustrative loss: <strong id="fake-loss"></strong></p>
+              <div style="height:8px;background:var(--surface2);border-radius:4px"><div id="loss-bar-inner" style="height:100%;width:40%;background:var(--accent)"></div></div>
+            </div>
+          </section>
+          <section class="panel" data-step="save">
+            <h2>Step 8 — Save</h2>
+            <p class="lead">See <strong>ARTIFACTS</strong> wing for what each file means.</p>
+            <div class="card" style="font-family:var(--mono);font-size:0.82rem">ml/outputs/smoke/ → model.safetensors, config.json, tokenizer.json, train_meta.json</div>
+          </section>
+        </div>
+
+        <div class="wing-panel" id="wing-artifacts" data-wing="artifacts"></div>
+        <div class="wing-panel" id="wing-infer" data-wing="infer"></div>
+
+        <footer class="lab-foot">
+          <code>python3 -m http.server 8080</code> → <code>/lab/</code> · Regenerate data:
+          <code>python3 lab/scripts/export_museum_data.py</code>
+        </footer>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="glossary-modal" role="dialog">
+      <div class="modal">
+        <header><strong>Glossary</strong> <button type="button" class="btn" id="glossary-close" style="float:right">Close</button></header>
+        <div class="body" id="glossary-body"></div>
+      </div>
+    </div>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,296 @@
+[
+  {
+    "name": "transformer.h.0.attn.c_attn.bias",
+    "shape": [
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.attn.c_attn.weight",
+    "shape": [
+      256,
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.attn.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.attn.c_proj.weight",
+    "shape": [
+      256,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.ln_1.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.ln_1.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.ln_2.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.ln_2.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.mlp.c_fc.bias",
+    "shape": [
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.mlp.c_fc.weight",
+    "shape": [
+      256,
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.mlp.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.0.mlp.c_proj.weight",
+    "shape": [
+      1024,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.attn.c_attn.bias",
+    "shape": [
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.attn.c_attn.weight",
+    "shape": [
+      256,
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.attn.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.attn.c_proj.weight",
+    "shape": [
+      256,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.ln_1.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.ln_1.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.ln_2.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.ln_2.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.mlp.c_fc.bias",
+    "shape": [
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.mlp.c_fc.weight",
+    "shape": [
+      256,
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.mlp.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.1.mlp.c_proj.weight",
+    "shape": [
+      1024,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.attn.c_attn.bias",
+    "shape": [
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.attn.c_attn.weight",
+    "shape": [
+      256,
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.attn.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.attn.c_proj.weight",
+    "shape": [
+      256,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.ln_1.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.ln_1.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.ln_2.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.ln_2.weight",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.mlp.c_fc.bias",
+    "shape": [
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.mlp.c_fc.weight",
+    "shape": [
+      256,
+      1024
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.mlp.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.2.mlp.c_proj.weight",
+    "shape": [
+      1024,
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.3.attn.c_attn.bias",
+    "shape": [
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.3.attn.c_attn.weight",
+    "shape": [
+      256,
+      768
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.3.attn.c_proj.bias",
+    "shape": [
+      256
+    ],
+    "dtype": "torch.float32"
+  },
+  {
+    "name": "transformer.h.3.attn.c_proj.weight",
+    "shape": [
+      256,
+      256
+    ],
+    "dtype": "torch.float32"
+  }
+]

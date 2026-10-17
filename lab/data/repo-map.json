@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    {"id": "docker", "label": "Docker ubuntu:22.04", "layer": "data"},
+    {"id": "generate", "label": "generate_sessions.py", "path": "ml/data/generate_sessions.py", "layer": "data"},
+    {"id": "jsonl", "label": "train/val JSONL", "path": "ml/data/sample/", "layer": "data"},
+    {"id": "train", "label": "ml/train.py", "path": "ml/train.py", "layer": "train"},
+    {"id": "hub", "label": "Hub: terminal-shell-mini", "layer": "artifacts"},
+    {"id": "serve", "label": "serve/app.py", "path": "serve/app.py", "layer": "infer"},
+    {"id": "space", "label": "Space demo", "path": "space/terminal-shell-mini-demo/", "layer": "infer"},
+    {"id": "cli", "label": "terminal-gpt CLI", "path": "src/terminal_gpt_mini/", "layer": "infer"}
+  ],
+  "edges": [
+    {"from": "docker", "to": "generate", "note": "Runs real bash commands"},
+    {"from": "generate", "to": "jsonl", "note": "Stdout → assistant messages"},
+    {"from": "jsonl", "to": "train", "note": "encode_example + Trainer"},
+    {"from": "train", "to": "hub", "note": "upload_to_hub.py / GHA"},
+    {"from": "hub", "to": "serve", "note": "loads weights + tokenizer"},
+    {"from": "hub", "to": "space", "note": "Gradio + generate()"},
+    {"from": "cli", "to": "serve", "note": "OpenAI API client (optional)"}
+  ],
+  "facts": [
+    "The model never sees Docker at inference — only token IDs built from chat text.",
+    "Labels (-100) exist only during training, not in serve/Space."
+  ]
+}

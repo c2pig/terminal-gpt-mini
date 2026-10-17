@@ -24,16 +24,16 @@ When `OPENAI_MODEL` contains `terminal-shell`, the client sends the shell system
 
 Requires Python 3.11+.
 
-## Interactive training lab
+## Interactive training lab (4-wing museum)
 
-Step-by-step browser walkthrough of `ml/train.py` (static SPA):
+Browser SPA: **MAP** (repo flow), **TRAIN** (`train.py`), **ARTIFACTS** (safetensors bundle), **INFER** (context & generate):
 
 ```bash
 python3 -m http.server 8080
 # open http://localhost:8080/lab/
 ```
 
-See `lab/README.md`.
+See `lab/README.md`. Regenerate data: `python3 lab/scripts/export_museum_data.py`.
 
 ## Live demo (Hugging Face Space)
 

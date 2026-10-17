@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>terminal-shell-mini — Training Lab</title>
+    <title>terminal-shell-mini — Knowledge Museum</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,303 +14,120 @@
   </head>
   <body>
     <header>
-      <h1>Training lab: <code>ml/train.py</code></h1>
-      <p>
-        Click a step on the left, then open <strong>Double-click details</strong> on each screen. Data comes from a real
-        <code>encode_example</code> run on <code>ml/data/sample/train.jsonl</code> (smoke tokenizer).
-      </p>
-      <p id="load-error" hidden style="color: var(--danger); margin-top: 0.5rem"></p>
+      <div class="title-block">
+        <h1>Knowledge museum — train &amp; infer in this repo</h1>
+        <p>Four wings: repo map, training pipeline, artifacts on disk, inference. Use <strong>Gap tour</strong> for a guided path.</p>
+        <p id="load-error" hidden style="color: var(--danger); margin-top: 0.35rem"></p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn" id="btn-glossary">Glossary</button>
+        <button type="button" class="btn btn-primary" id="btn-tour">Gap tour</button>
+      </div>
     </header>
 
+    <div class="tour-bar" id="tour-bar">
+      <span id="tour-text"></span>
+      <div class="tour-dots" id="tour-dots"></div>
+      <div>
+        <button type="button" class="btn" id="tour-skip">Exit</button>
+        <button type="button" class="btn btn-primary" id="tour-next">Next</button>
+      </div>
+    </div>
+
+    <div class="breadcrumb" id="breadcrumb">MAP › Overview</div>
+
     <div class="layout">
-      <nav class="steps-nav" aria-label="Training steps">
-        <h2>Steps</h2>
-        <div id="steps-nav-list"></div>
+      <nav class="wing-nav" aria-label="Museum wings">
+        <h2>Wings</h2>
+        <button type="button" class="wing-btn active" data-wing="map">MAP</button>
+        <button type="button" class="wing-btn" data-wing="train">TRAIN</button>
+        <button type="button" class="wing-btn" data-wing="artifacts">ARTIFACTS</button>
+        <button type="button" class="wing-btn" data-wing="infer">INFER</button>
       </nav>
 
-      <main>
-        <!-- 0 overview -->
-        <section class="panel active" data-step="overview" id="panel-overview">
-          <h2>Big picture</h2>
-          <p class="lead">
-            <code>train.py</code> reads chat JSONL, builds a small tokenizer, turns each row into numbers, and updates a
-            tiny GPT-2 so it predicts <em>assistant</em> tokens (shell output) given the conversation so far.
-          </p>
-          <div class="flow-h">
-            <span class="node">tiny.yaml</span>
-            <span class="arrow">+</span>
-            <span class="node">train.jsonl</span>
-            <span class="arrow">→</span>
-            <span class="node">train.py</span>
-            <span class="arrow">→</span>
-            <span class="node">ml/outputs/…</span>
-          </div>
-          <div class="io-grid">
+      <nav class="sub-nav" id="sub-nav" aria-label="Sub topics"></nav>
+
+      <main class="museum-main">
+        <div class="wing-panel active" id="wing-map" data-wing="map"></div>
+
+        <div class="wing-panel" id="wing-train" data-wing="train">
+          <section class="panel active" data-step="overview">
+            <h2>Big picture</h2>
+            <p class="lead"><code>train.py</code> reads chat JSONL, builds a tokenizer, encodes rows, and updates a tiny GPT-2 to predict assistant tokens.</p>
+            <div class="io-grid">
+              <div class="card"><span class="badge badge-in">Inputs</span><ul style="margin:0;padding-left:1.2rem;color:var(--muted);font-size:0.9rem"><li><code>ml/config/tiny.yaml</code></li><li>train/val JSONL</li><li><code>--smoke</code>, <code>--max-steps</code></li></ul></div>
+              <div class="card"><span class="badge badge-out">Outputs</span><ul style="margin:0;padding-left:1.2rem;color:var(--muted);font-size:0.9rem"><li><code>model.safetensors</code></li><li><code>tokenizer.json</code></li><li><code>train_meta.json</code></li></ul></div>
+            </div>
+            <details class="drill"><summary>Double-click details — supervised LM</summary><div class="drill-body">Each JSONL line is a full chat. Loss is only on assistant text (see INFER › Train vs infer).</div></details>
+          </section>
+          <section class="panel" data-step="jsonl">
+            <h2>Step 1 — JSONL row</h2>
+            <p class="lead">One line = one <code>messages</code> array.</p>
+            <div class="io-grid">
+              <div class="card"><span class="badge badge-in">Chat</span><div class="chat" id="chat-jsonl"></div></div>
+              <div class="card"><span class="badge badge-out">Raw JSON</span><pre class="io-box io-in" id="raw-json" style="max-height:200px;overflow:auto"></pre></div>
+            </div>
+          </section>
+          <section class="panel" data-step="tokenizer">
+            <h2>Step 2 — Tokenizer</h2>
+            <p class="lead">Byte-level BPE fit on train+val message text (~800 vocab). <strong>IDs are integers, not vectors.</strong></p>
+            <div class="card"><h3>Rendered string</h3><pre class="io-box io-in" id="rendered-text"></pre></div>
+            <div class="card"><h3>Tokens</h3><p id="encode-stats" style="font-size:0.85rem;color:var(--muted)"></p><div class="token-strip" id="token-strip"></div></div>
+          </section>
+          <section class="panel" data-step="encode">
+            <h2>Step 3 — encode_example</h2>
+            <p class="lead"><span style="color:var(--train)">Yellow</span> = trained; gray = label <code>-100</code>.</p>
+            <div class="card"><table class="params"><thead><tr><th>pos</th><th>id</th><th>token</th><th>label</th></tr></thead><tbody id="align-tbody"></tbody></table></div>
+          </section>
+          <section class="panel" data-step="model">
+            <h2>Step 4 — GPT-2 (random weights at init)</h2>
+            <p class="lead">Embeddings turn IDs into vectors inside the network.</p>
+            <div class="card arch">
+              <div class="arch-box">IDs → Embedding (vectors)</div>
+              <div class="arch-box">4× Transformer block</div>
+              <div class="arch-box">LM head → logits</div>
+            </div>
+            <div class="card"><table class="params"><thead><tr><th>Key</th><th>Value</th><th>Meaning</th></tr></thead><tbody id="yaml-table"></tbody></table></div>
+          </section>
+          <section class="panel" data-step="batch">
+            <h2>Step 5 — PadCollator</h2>
+            <div class="card"><div id="pad-demo"></div></div>
+          </section>
+          <section class="panel" data-step="step">
+            <h2>Step 6 — One train step</h2>
+            <div class="card" id="train-step-detail"></div>
+          </section>
+          <section class="panel" data-step="loop">
+            <h2>Step 7 — Trainer loop</h2>
             <div class="card">
-              <span class="badge badge-in">Inputs</span>
-              <ul style="margin: 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.9rem">
-                <li>Config: <code>ml/config/tiny.yaml</code></li>
-                <li>Train / val JSONL (<code>--smoke</code> → <code>ml/data/sample/</code>)</li>
-                <li>Flags: <code>--max-steps</code>, <code>--output-dir</code></li>
-              </ul>
+              <input type="range" id="step-slider" min="1" max="500" value="120" style="width:100%;accent-color:var(--accent)" />
+              <p id="step-readout" style="font-family:var(--mono);font-size:0.85rem"></p>
+              <p>Illustrative loss: <strong id="fake-loss"></strong></p>
+              <div style="height:8px;background:var(--surface2);border-radius:4px"><div id="loss-bar-inner" style="height:100%;width:40%;background:var(--accent)"></div></div>
             </div>
-            <div class="card">
-              <span class="badge badge-out">Outputs</span>
-              <ul style="margin: 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.9rem">
-                <li><code>model.safetensors</code> — weights</li>
-                <li><code>tokenizer.json</code> — text ↔ IDs</li>
-                <li><code>config.json</code>, <code>train_meta.json</code></li>
-              </ul>
-            </div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — what is “training” here?</summary>
-            <div class="drill-body">
-              <p>
-                This is <strong>supervised causal language modeling</strong>. Each JSONL line is a full conversation. The
-                model is not told “run bash”; it learns statistics of token sequences that look like
-                <code>&lt;|user|&gt; … command</code> followed by <code>&lt;|assistant|&gt; … output</code>.
-              </p>
-              <dl class="glossary">
-                <dt>Parameter</dt>
-                <dd>A number inside the network that training adjusts (~3.4M of them).</dd>
-                <dt>Step</dt>
-                <dd>One batch processed and one optimizer update (AdamW).</dd>
-                <dt>Smoke mode</dt>
-                <dd><code>--smoke</code> uses the small committed sample and faster hyperparameters for CI.</dd>
-              </dl>
-            </div>
-          </details>
-        </section>
+          </section>
+          <section class="panel" data-step="save">
+            <h2>Step 8 — Save</h2>
+            <p class="lead">See <strong>ARTIFACTS</strong> wing for what each file means.</p>
+            <div class="card" style="font-family:var(--mono);font-size:0.82rem">ml/outputs/smoke/ → model.safetensors, config.json, tokenizer.json, train_meta.json</div>
+          </section>
+        </div>
 
-        <!-- 1 jsonl -->
-        <section class="panel" data-step="jsonl">
-          <h2>Step 1 — One JSONL row</h2>
-          <p class="lead">Each line in <code>train.jsonl</code> is one JSON object with a <code>messages</code> array (OpenAI-style roles).</p>
-          <div class="io-grid">
-            <div class="card">
-              <span class="badge badge-in">Input</span>
-              <div class="chat" id="chat-jsonl"></div>
-            </div>
-            <div class="card">
-              <span class="badge badge-out">Source</span>
-              <p style="margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--muted)">
-                <code>ml/data/generate_sessions.py</code> runs commands in Docker and records stdout as the assistant message.
-              </p>
-              <pre class="io-box io-in" id="raw-json" style="max-height: 220px; overflow: auto"></pre>
-            </div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — roles</summary>
-            <div class="drill-body">
-              <dl class="glossary">
-                <dt>system</dt>
-                <dd>Instructions (“you are a terminal…”). Shown to the model; loss is <strong>not</strong> applied here.</dd>
-                <dt>user</dt>
-                <dd>Prompt line like <code>user@dev:~$ pwd</code>. Context only; loss ignored.</dd>
-                <dt>assistant</dt>
-                <dd>Command output (e.g. <code>/home/user</code>). This is what we train the model to produce.</dd>
-              </dl>
-            </div>
-          </details>
-        </section>
-
-        <!-- 2 tokenizer -->
-        <section class="panel" data-step="tokenizer">
-          <h2>Step 2 — Tokenizer (<code>build_tokenizer</code>)</h2>
-          <p class="lead">
-            Before training, <code>train.py</code> fits <strong>byte-level BPE</strong> on all message text in train+val files
-            (vocab ~800). Text becomes lists of integers (<strong>token IDs</strong>).
-          </p>
-          <div class="card">
-            <h3>Rendered chat string (what gets tokenized)</h3>
-            <pre class="io-box io-in" id="rendered-text"></pre>
-          </div>
-          <div class="card">
-            <h3>Token chips (hover for ID)</h3>
-            <p style="margin: 0 0 0.35rem; font-size: 0.85rem; color: var(--muted)" id="encode-stats"></p>
-            <div class="token-strip" id="token-strip"></div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — BPE & special tokens</summary>
-            <div class="drill-body">
-              <p>
-                <strong>BPE</strong> merges frequent character pairs into subword tokens until the vocabulary reaches the
-                target size. <strong>Byte-level</strong> means it can represent any UTF-8 text.
-              </p>
-              <p>Reserved markers: <code>&lt;|system|&gt;</code>, <code>&lt;|user|&gt;</code>, <code>&lt;|assistant|&gt;</code>, <code>&lt;|end|&gt;</code> — must stay single tokens after training the BPE.</p>
-              <p><strong>Code:</strong> <code>train.py</code> → <code>build_tokenizer()</code>, <code>iter_message_text()</code>.</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 3 encode -->
-        <section class="panel" data-step="encode">
-          <h2>Step 3 — <code>encode_example</code> (ml/chat_format.py)</h2>
-          <p class="lead">
-            Produces <code>input_ids</code> (what the model sees) and <code>labels</code> (what it should predict).
-            <span style="color: var(--train)">Yellow tokens</span> are trained; gray tokens use label <code>-100</code> (ignored in loss).
-          </p>
-          <div class="card">
-            <table class="params">
-              <thead>
-                <tr>
-                  <th>pos</th>
-                  <th>input_id</th>
-                  <th>token</th>
-                  <th>label</th>
-                </tr>
-              </thead>
-              <tbody id="align-tbody"></tbody>
-            </table>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — why <code>-100</code>?</summary>
-            <div class="drill-body">
-              <p>
-                Hugging Face uses label <code>-100</code> to mean “do not compute loss at this position.” We already know the
-                system prompt and user command; we only want the network to learn to continue with <strong>assistant</strong> text
-                and <code>&lt;|end|&gt;</code>.
-              </p>
-              <p><strong>Output dict per row:</strong> <code>input_ids</code>, <code>labels</code>, <code>attention_mask</code> (all 1s until padding).</p>
-              <p><strong>Code:</strong> <code>EncodedChatDataset</code> in <code>train.py</code> calls <code>encode_example</code> for each JSONL line.</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 4 model -->
-        <section class="panel" data-step="model">
-          <h2>Step 4 — Build GPT-2 (<code>build_model</code>)</h2>
-          <p class="lead">A <strong>new</strong> <code>GPT2LMHeadModel</code> is created from scratch (random weights), sized by <code>tiny.yaml</code>.</p>
-          <div class="card arch">
-            <div class="arch-box">Token IDs → <strong>Embedding</strong> (vocab × n_embd)</div>
-            <div class="arch-arrow">↓ × 4 layers</div>
-            <div class="arch-box"><strong>Transformer block</strong><br />self-attention + feed-forward</div>
-            <div class="arch-arrow">↓</div>
-            <div class="arch-box"><strong>LM head</strong> → logits (vocab scores per position)</div>
-          </div>
-          <div class="card">
-            <table class="params">
-              <thead>
-                <tr>
-                  <th>Key</th>
-                  <th>Value</th>
-                  <th>Meaning</th>
-                </tr>
-              </thead>
-              <tbody id="yaml-table"></tbody>
-            </table>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — causal LM</summary>
-            <div class="drill-body">
-              <p>
-                At each position, the model may only attend to <strong>earlier</strong> tokens (causal mask). It outputs a
-                probability distribution over the vocabulary for the <strong>next</strong> token. Training compares that distribution to the true next token (cross-entropy).
-              </p>
-              <p><code>train.py</code> checks parameter count is between 1M and 10M (~3.35M for this config).</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 5 batch -->
-        <section class="panel" data-step="batch">
-          <h2>Step 5 — Batch &amp; pad (<code>PadCollator</code>)</h2>
-          <p class="lead">
-            The Trainer groups several examples into a batch. Shorter sequences are padded so all rows have the same width.
-          </p>
-          <div class="card">
-            <h3>Mini example (batch size 2)</h3>
-            <div id="pad-demo"></div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — tensors</summary>
-            <div class="drill-body">
-              <dl class="glossary">
-                <dt>input_ids</dt>
-                <dd>Padded with <code>pad_token_id</code> (here, end-of-text token).</dd>
-                <dt>labels</dt>
-                <dd>Padded with <code>-100</code> so loss ignores pad positions.</dd>
-                <dt>attention_mask</dt>
-                <dd><code>1</code> on real tokens, <code>0</code> on pad — model must not attend to pad.</dd>
-              </dl>
-              <p><strong>Code:</strong> <code>PadCollator</code> in <code>train.py</code> → PyTorch <code>torch.Tensor</code> batches.</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 6 one step -->
-        <section class="panel" data-step="step">
-          <h2>Step 6 — One training step</h2>
-          <p class="lead">Inside <code>trainer.train()</code>, each step: forward → loss → backward → AdamW update. CPU only in this repo (<code>use_cpu=True</code>).</p>
-          <div class="card" id="train-step-detail"></div>
-          <details class="drill">
-            <summary>Double-click details — forward / backward</summary>
-            <div class="drill-body">
-              <p><strong>Forward:</strong> batch <code>input_ids</code> → model → <code>logits</code> shape <code>[batch, seq, vocab]</code>.</p>
-              <p><strong>Loss:</strong> only positions where <code>labels ≠ -100</code>.</p>
-              <p><strong>Backward:</strong> gradients flow to all parameters that influenced those predictions.</p>
-              <p><strong>Optimizer:</strong> AdamW nudges weights to reduce average loss.</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 7 loop -->
-        <section class="panel" data-step="loop">
-          <h2>Step 7 — Trainer loop</h2>
-          <p class="lead">
-            Repeats for <code>max_steps</code> (500 smoke / 1500 full). Periodically runs validation loss on <code>val.jsonl</code>.
-          </p>
-          <div class="card">
-            <div class="slider-row">
-              <label for="step-slider"><strong>Simulated progress</strong></label>
-              <input type="range" id="step-slider" min="1" max="500" value="120" />
-            </div>
-            <p id="step-readout" style="margin: 0; font-family: var(--mono); font-size: 0.85rem"></p>
-            <p style="margin: 0.5rem 0 0; font-size: 0.85rem">
-              Illustrative train loss: <strong id="fake-loss">—</strong> (not from a real run; shape only)
-            </p>
-            <div class="loss-bar"><div id="loss-bar-inner" style="height: 100%; width: 40%; background: linear-gradient(90deg, var(--accent-dim), var(--accent))"></div></div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — TrainingArguments</summary>
-            <div class="drill-body">
-              <p>Key settings in <code>train.py</code>: <code>learning_rate</code>, <code>warmup_steps</code>, <code>lr_scheduler_type</code> (cosine or constant for smoke), <code>per_device_train_batch_size=4</code>, <code>save_strategy=no</code> (single save at end).</p>
-              <p>GitHub Actions: PR runs <code>--smoke --max-steps 10</code>; push to <code>main</code> runs full data + upload to Hub.</p>
-            </div>
-          </details>
-        </section>
-
-        <!-- 8 save -->
-        <section class="panel" data-step="save">
-          <h2>Step 8 — Save</h2>
-          <p class="lead"><code>trainer.save_model(output_dir)</code> and <code>tokenizer.save_pretrained(output_dir)</code> write the artifact you use in eval, serve, and the HF Space.</p>
-          <div class="card file-tree">
-            <div><code>ml/outputs/smoke/</code> (or <code>full/</code>)</div>
-            <div>├── <span class="file">model.safetensors</span> — trained weights</div>
-            <div>├── <span class="file">config.json</span> — architecture</div>
-            <div>├── <span class="file">tokenizer.json</span> — BPE vocab + merges</div>
-            <div>├── <span class="file">generation_config.json</span></div>
-            <div>└── <span class="file">train_meta.json</span> — steps, loss, git SHA</div>
-          </div>
-          <details class="drill">
-            <summary>Double-click details — inference uses the same format</summary>
-            <div class="drill-body">
-              <p>
-                At inference, there are no <code>labels</code>. Code builds a prompt with <code>render_messages</code> /
-                <code>prompt_token_ids</code> and calls <code>model.generate()</code> until <code>&lt;|end|&gt;</code> — same markers as training.
-              </p>
-              <p>See <code>ml/eval.py</code>, <code>serve/app.py</code>, <code>space/terminal-shell-mini-demo/app.py</code>.</p>
-            </div>
-          </details>
-        </section>
+        <div class="wing-panel" id="wing-artifacts" data-wing="artifacts"></div>
+        <div class="wing-panel" id="wing-infer" data-wing="infer"></div>
 
         <footer class="lab-foot">
-          Regenerate example data after tokenizer changes:
-          <code>python lab/scripts/export_example.py</code> (from repo root). Serve this folder:
-          <code>python -m http.server 8080</code> → open <code>http://localhost:8080/lab/</code>.
+          <code>python3 -m http.server 8080</code> → <code>/lab/</code> · Regenerate data:
+          <code>python3 lab/scripts/export_museum_data.py</code>
         </footer>
       </main>
+    </div>
+
+    <div class="modal-backdrop" id="glossary-modal" role="dialog">
+      <div class="modal">
+        <header><strong>Glossary</strong> <button type="button" class="btn" id="glossary-close" style="float:right">Close</button></header>
+        <div class="body" id="glossary-body"></div>
+      </div>
     </div>
 
     <script src="app.js" type="module"></script>

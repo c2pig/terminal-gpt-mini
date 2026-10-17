@@ -24,6 +24,19 @@ When `OPENAI_MODEL` contains `terminal-shell`, the client sends the shell system
 
 Requires Python 3.11+.
 
+## Live demo (Hugging Face Space)
+
+Try the model in the browser (no local install):
+
+**https://huggingface.co/spaces/c2pig/terminal-shell-mini-demo**
+
+Source for the Space lives in `space/terminal-shell-mini-demo/`. To redeploy after edits:
+
+```bash
+hf upload c2pig/terminal-shell-mini-demo space/terminal-shell-mini-demo --repo-type space \
+  --exclude "**/__pycache__/**"
+```
+
 ## End-to-end
 
 The local model is a from-scratch GPT-2 of about 3.4M parameters with a byte-level BPE tokenizer fit on the training text. Weights are not stored in git. GitHub Actions trains on CPU and uploads them to Hugging Face.

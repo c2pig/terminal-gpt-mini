@@ -24,6 +24,17 @@ When `OPENAI_MODEL` contains `terminal-shell`, the client sends the shell system
 
 Requires Python 3.11+.
 
+## Interactive training lab
+
+Step-by-step browser walkthrough of `ml/train.py` (static SPA):
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/lab/
+```
+
+See `lab/README.md`.
+
 ## Live demo (Hugging Face Space)
 
 Try the model in the browser (no local install):
